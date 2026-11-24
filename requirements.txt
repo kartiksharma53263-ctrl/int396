@@ -1,0 +1,15 @@
+# Core Dependencies for Road Segment Congestion Pattern Discovery
+pandas==2.2.2
+numpy==1.26.4
+scipy==1.14.1
+scikit-learn==1.5.2
+matplotlib==3.9.2
+seaborn==0.13.2
+joblib==1.4.2
+Flask==3.0.3
+Werkzeug==3.0.4
+streamlit>=1.36,<2.0
+ipykernel==7.4.0
+nbformat==5.11.1
+nbconvert==7.17.1
+

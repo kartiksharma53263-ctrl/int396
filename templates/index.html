@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard Overview{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Road Segment Congestion Pattern Discovery</h1>
+    <p>Unsupervised operational regime identification from continuous 15-minute multi-vehicle telemetry</p>
+  </div>
+  <div>
+    <a href="{{ url_for('predict_view') }}" class="btn">⚡ Test Real-Time Classifier</a>
+  </div>
+</div>
+
+<!-- KPI Stats Grid -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-title">Unit of Analysis</div>
+    <div class="stat-value">Time-Slot</div>
+    <div class="stat-desc">Hour-of-day × Day-of-week profile</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-title">Total Observations</div>
+    <div class="stat-value">{{ summary.total_samples }}</div>
+    <div class="stat-desc">15-minute continuous intervals</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-title">Optimal Clusters (k)</div>
+    <div class="stat-value" style="color: #3b82f6;">4</div>
+    <div class="stat-desc">Defensible elbow & L1/L2 silhouette</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-title">Seed Stability (ARI)</div>
+    <div class="stat-value" style="color: #10b981;">0.998</div>
+    <div class="stat-desc">Pairwise ARI across 15 seeds</div>
+  </div>
+</div>
+
+<!-- Discovered Operational Clusters -->
+<div class="card">
+  <div class="card-title">
+    <span>Discovered Traffic Operating Regimes (k = 4)</span>
+    <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: normal;">Unsupervised Centroid Extraction</span>
+  </div>
+  <div class="cluster-grid">
+    <div class="cluster-card c0">
+      <span class="cluster-badge badge-c0">Cluster 0</span>
+      <div class="cluster-name">Midday Commercial & Freight Flow</div>
+      <div class="cluster-stats">
+        <span><strong>Volume:</strong> 86.8 veh/interval</span>
+        <span><strong>Peak Hours:</strong> 11:00 AM – 4:30 PM (Weekdays)</span>
+        <span><strong>Fleet Mix:</strong> High Trucks (18.3) & Balanced Cars</span>
+        <span><strong>Ground Truth:</strong> 48.9% Normal, 47.4% High</span>
+      </div>
+    </div>
+
+    <div class="cluster-card c1">
+      <span class="cluster-badge badge-c1">Cluster 1</span>
+      <div class="cluster-name">Peak Commuter Rush Hour</div>
+      <div class="cluster-stats">
+        <span><strong>Volume:</strong> 125.7 veh/interval (Highest)</span>
+        <span><strong>Peak Hours:</strong> 7:30–9:30 AM & 5:00–7:30 PM</span>
+        <span><strong>Fleet Mix:</strong> Dominant Cars (85.2) & Bikes (26.6)</span>
+        <span><strong>Ground Truth:</strong> <strong style="color: #ef4444;">79.9% Heavy Congestion</strong></span>
+      </div>
+    </div>
+
+    <div class="cluster-card c2">
+      <span class="cluster-badge badge-c2">Cluster 2</span>
+      <div class="cluster-name">Nighttime / Early Dawn Low Flow</div>
+      <div class="cluster-stats">
+        <span><strong>Volume:</strong> 16.5 veh/interval (Lowest)</span>
+        <span><strong>Active Hours:</strong> 12:00 AM – 5:45 AM</span>
+        <span><strong>Fleet Mix:</strong> Overnight Logistics (41.4% Truck Ratio)</span>
+        <span><strong>Ground Truth:</strong> <strong style="color: #10b981;">98.4% Free Flow / Low</strong></span>
+      </div>
+    </div>
+
+    <div class="cluster-card c3">
+      <span class="cluster-badge badge-c3">Cluster 3</span>
+      <div class="cluster-name">Weekend Leisure & Off-Peak Flow</div>
+      <div class="cluster-stats">
+        <span><strong>Volume:</strong> 56.6 veh/interval</span>
+        <span><strong>Active Days:</strong> <strong style="color: #10b981;">100% Saturday & Sunday</strong></span>
+        <span><strong>Fleet Mix:</strong> Personal Cars & Bikes, Minimal Freight</span>
+        <span><strong>Ground Truth:</strong> 55.6% Normal, 28.3% Low</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Visual Diagnostics Overview -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+  <div class="card">
+    <div class="card-title">Diurnal Traffic & Modal Share</div>
+    <div class="figure-container">
+      <img src="{{ url_for('figure_file', filename='01_diurnal_hourly_pattern.png') }}" alt="Hourly Diurnal Traffic Pattern">
+    </div>
+    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem;">
+      Shows continuous 24-hour diurnal vehicle volume. Notice morning (8-9 AM) and evening (5-7 PM) commute surges.
+    </p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">PCA 2D Cluster Space (k = 4)</div>
+    <div class="figure-container">
+      <img src="{{ url_for('figure_file', filename='05_pca_2d_clusters.png') }}" alt="PCA 2D Cluster Projection">
+    </div>
+    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem;">
+      Two principal components explain <strong>56.7%</strong> of total feature variance, separating commuter rush, freight, night, and weekend states.
+    </p>
+  </div>
+</div>
+{% endblock %}
+

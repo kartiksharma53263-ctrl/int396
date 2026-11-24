@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}Cluster Profiles & Stability{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Cluster Profiles, Validation & Stability Analysis</h1>
+    <p>Detailed physical feature statistics, ground-truth alignment, and statistical robustness tests</p>
+  </div>
+</div>
+
+<!-- Physical Unit Profiles Table -->
+<div class="card">
+  <div class="card-title">Original Physical Unit Cluster Means</div>
+  <div class="table-responsive">
+    <table>
+      <thead>
+        <tr>
+          <th>Cluster</th>
+          <th>Persona</th>
+          <th>Samples</th>
+          <th>Share</th>
+          <th>Total Vol</th>
+          <th>Cars</th>
+          <th>Bikes</th>
+          <th>Buses</th>
+          <th>Trucks</th>
+          <th>Truck %</th>
+          <th>Mean Hour</th>
+          <th>Weekend %</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="cluster-badge badge-c0">C0</span></td>
+          <td><strong>Midday Commercial Flow</strong></td>
+          <td>938</td>
+          <td>31.5%</td>
+          <td><strong>86.8</strong></td>
+          <td>52.4</td>
+          <td>13.8</td>
+          <td>7.3</td>
+          <td><strong>18.3</strong></td>
+          <td>21.1%</td>
+          <td>16.0 (4 PM)</td>
+          <td>1.0%</td>
+        </tr>
+        <tr>
+          <td><span class="cluster-badge badge-c1">C1</span></td>
+          <td><strong>Peak Commuter Rush Hour</strong></td>
+          <td>737</td>
+          <td>24.8%</td>
+          <td><strong style="color: #ef4444;">125.7</strong></td>
+          <td>85.2</td>
+          <td>26.6</td>
+          <td>11.2</td>
+          <td>4.6</td>
+          <td>3.7%</td>
+          <td>12.9</td>
+          <td>0.0%</td>
+        </tr>
+        <tr>
+          <td><span class="cluster-badge badge-c2">C2</span></td>
+          <td><strong>Night Low-Flow Freight</strong></td>
+          <td>668</td>
+          <td>22.5%</td>
+          <td><strong style="color: #10b981;">16.5</strong></td>
+          <td>7.9</td>
+          <td>1.8</td>
+          <td>1.0</td>
+          <td>6.8</td>
+          <td><strong style="color: #f59e0b;">41.4%</strong></td>
+          <td>3.4 (3 AM)</td>
+          <td>19.0%</td>
+        </tr>
+        <tr>
+          <td><span class="cluster-badge badge-c3">C3</span></td>
+          <td><strong>Weekend Leisure & Off-Peak</strong></td>
+          <td>633</td>
+          <td>21.3%</td>
+          <td>56.6</td>
+          <td>35.2</td>
+          <td>12.2</td>
+          <td>4.8</td>
+          <td>4.4</td>
+          <td>7.8%</td>
+          <td>13.6 (1 PM)</td>
+          <td><strong style="color: #10b981;">100.0%</strong></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Standardized Centroids Heatmap & Ground Truth Composition -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+  <div class="card">
+    <div class="card-title">Standardized Centroids Heatmap (Z-Scores)</div>
+    <div class="figure-container">
+      <img src="{{ url_for('figure_file', filename='08_standardized_centroids_heatmap.png') }}" alt="Standardized Centroids">
+    </div>
+    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem;">
+      Depicts deviation from global mean in standard deviation units across cyclical, calendar, volume, and ratio dimensions.
+    </p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Held-Out 'Traffic Situation' Composition</div>
+    <div class="figure-container">
+      <img src="{{ url_for('figure_file', filename='09_traffic_situation_by_cluster.png') }}" alt="Traffic Situation Breakdown">
+    </div>
+    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem;">
+      Notice that Cluster 1 isolates <strong>79.9%</strong> of "Heavy" congestion and Cluster 2 isolates <strong>98.4%</strong> of "Low" congestion.
+    </p>
+  </div>
+</div>
+
+<!-- Stability Analysis Grid -->
+<div class="card">
+  <div class="card-title">Statistical Stability & Robustness (Adjusted Rand Index)</div>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: center;">
+    <div>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>k</th>
+              <th>Seed Mean ARI</th>
+              <th>Seed Min ARI</th>
+              <th>80% Bootstrap ARI</th>
+              <th>Bootstrap Min ARI</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in stability %}
+            <tr {% if s.k == 4 %}style="background-color: rgba(59, 130, 246, 0.15); font-weight: bold;"{% endif %}>
+              <td>{{ s.k }}</td>
+              <td>{{ s.seed_mean_ari }}</td>
+              <td>{{ s.seed_min_ari }}</td>
+              <td>{{ s.bootstrap_mean_ari }}</td>
+              <td>{{ s.bootstrap_min_ari }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.75rem;">
+        At <strong>k = 4</strong>, the cluster configuration demonstrates near-perfect stability across random initializations (Mean ARI = <strong>0.9979</strong>) and robust subsample stability (Mean ARI = <strong>0.9653</strong>).
+      </p>
+    </div>
+    <div class="figure-container">
+      <img src="{{ url_for('figure_file', filename='10_stability_ari_comparison.png') }}" alt="Stability Comparison">
+    </div>
+  </div>
+</div>
+{% endblock %}
+

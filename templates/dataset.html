@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Dataset & Pipeline{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Dataset Management & Pipeline Orchestration</h1>
+    <p>Inspect raw 15-minute telemetry records, upload a new Kaggle CSV, or retrain the clustering pipeline</p>
+  </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+  <!-- Upload New CSV Card -->
+  <div class="card">
+    <div class="card-title">Upload New Telemetry CSV</div>
+    <form action="{{ url_for('upload_dataset') }}" method="POST" enctype="multipart/form-data">
+      <div class="form-group" style="margin-bottom: 1rem;">
+        <label for="csvFile">Choose CSV File (Kaggle Traffic Dataset format)</label>
+        <input type="file" id="csvFile" name="file" accept=".csv" required style="padding: 0.5rem;">
+      </div>
+      <button type="submit" class="btn">Upload & Replace Dataset</button>
+    </form>
+    <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.75rem;">
+      Expected schema: <code>Time, Date, Day of the week, CarCount, BikeCount, BusCount, TruckCount, Total, Traffic Situation</code>
+    </p>
+  </div>
+
+  <!-- Retrain Pipeline Card -->
+  <div class="card">
+    <div class="card-title">Run End-to-End Pipeline</div>
+    <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;">
+      Executes full feature engineering, cyclical encoding, K-Means grid (k=2..10), PCA projections, profiling, and exports all 10 diagnostic figures.
+    </p>
+    <form action="{{ url_for('retrain_pipeline') }}" method="POST">
+      <button type="submit" class="btn" style="background-color: #10b981;">⚡ Retrain Clustering Pipeline</button>
+    </form>
+  </div>
+</div>
+
+<!-- Raw Dataset Preview Table -->
+<div class="card">
+  <div class="card-title">
+    <span>Raw Telemetry Preview (First 50 Intervals)</span>
+    <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: normal;">Source: data/raw/Traffic.csv</span>
+  </div>
+  <div class="table-responsive">
+    <table>
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Date</th>
+          <th>Day of Week</th>
+          <th>CarCount</th>
+          <th>BikeCount</th>
+          <th>BusCount</th>
+          <th>TruckCount</th>
+          <th>Total</th>
+          <th>Traffic Situation</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in records %}
+        <tr>
+          <td>{{ row['Time'] }}</td>
+          <td>{{ row['Date'] }}</td>
+          <td>{{ row['Day of the week'] }}</td>
+          <td>{{ row['CarCount'] }}</td>
+          <td>{{ row['BikeCount'] }}</td>
+          <td>{{ row['BusCount'] }}</td>
+          <td>{{ row['TruckCount'] }}</td>
+          <td><strong>{{ row['Total'] }}</strong></td>
+          <td>
+            {% if row['Traffic Situation'] == 'heavy' %}
+              <span class="cluster-badge" style="background-color: #ef4444;">heavy</span>
+            {% elif row['Traffic Situation'] == 'high' %}
+              <span class="cluster-badge" style="background-color: #f59e0b;">high</span>
+            {% elif row['Traffic Situation'] == 'normal' %}
+              <span class="cluster-badge" style="background-color: #3b82f6;">normal</span>
+            {% else %}
+              <span class="cluster-badge" style="background-color: #10b981;">low</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+

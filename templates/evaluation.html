@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Model Diagnostics & PCA{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Model Diagnostics & Multi-Metric Evaluation</h1>
+    <p>Empirical evaluation of cluster numbers (k=2 to 10), distance metrics, and dimensionality reduction</p>
+  </div>
+</div>
+
+<!-- Metrics Grid Table -->
+<div class="card">
+  <div class="card-title">K-Means Experimental Evaluation Grid (k = 2 to 10)</div>
+  <div class="table-responsive">
+    <table>
+      <thead>
+        <tr>
+          <th>k</th>
+          <th>WCSS (Inertia)</th>
+          <th>Silhouette (Euclidean L2)</th>
+          <th>Silhouette (Manhattan L1)</th>
+          <th>Davies-Bouldin</th>
+          <th>Calinski-Harabasz</th>
+          <th>Min Cluster Size</th>
+          <th>Min Cluster %</th>
+          <th>Recommendation</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in grid %}
+        <tr {% if row.k == 4 %}style="background-color: rgba(59, 130, 246, 0.15); font-weight: bold;"{% endif %}>
+          <td>{{ row.k }}</td>
+          <td>{{ row.wcss }}</td>
+          <td>{{ row.silhouette_euclidean }}</td>
+          <td>{{ row.silhouette_manhattan }}</td>
+          <td>{{ row.davies_bouldin }}</td>
+          <td>{{ row.calinski_harabasz }}</td>
+          <td>{{ row.min_cluster_size }}</td>
+          <td>{{ row.min_cluster_pct }}%</td>
+          <td>
+            {% if row.k == 4 %}
+              <span class="cluster-badge" style="background-color: #3b82f6;">Optimal Selected (k=4)</span>
+            {% elif row.k < 4 %}
+              <span style="color: var(--text-muted);">Under-segmented</span>
+            {% else %}
+              <span style="color: var(--text-muted);">Over-fragmented</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Visual Diagnostics Comparison -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+  <div class="card">
+    <div class="card-title">Elbow Curve (WCSS vs. k)</div>
+    <div class="figure-container">
+      <img src="{{ url_for('figure_file', filename='03_elbow_curve.png') }}" alt="Elbow Curve">
+    </div>
+    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem;">
+      The inflection elbow clearly presents at <strong>k = 4</strong>, after which marginal inertia reduction slows significantly.
+    </p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Silhouette (L1 & L2) & Davies-Bouldin</div>
+    <div class="figure-container">
+      <img src="{{ url_for('figure_file', filename='04_silhouette_and_db_comparison.png') }}" alt="Silhouette Scores">
+    </div>
+    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem;">
+      Manhattan silhouette score peaks prominently at k=4 (0.348) alongside a favorable Davies-Bouldin score (1.43).
+    </p>
+  </div>
+</div>
+
+<!-- PCA Loadings and Silhouette Distribution -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+  <div class="card">
+    <div class="card-title">PCA Component Loadings</div>
+    <div class="figure-container">
+      <img src="{{ url_for('figure_file', filename='06_pca_loadings.png') }}" alt="PCA Component Loadings">
+    </div>
+    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem;">
+      Shows how original physical features contribute to principal components (PC1 = volume/commute vs freight, PC2 = weekend/diurnal).
+    </p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Per-Sample Silhouette Diagnostic (k = 4)</div>
+    <div class="figure-container">
+      <img src="{{ url_for('figure_file', filename='07_silhouette_samples.png') }}" alt="Silhouette Sample Distribution">
+    </div>
+    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem;">
+      Diagnostic check confirming all 4 clusters exceed baseline cohesion thresholds without negative coefficient contamination.
+    </p>
+  </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Live Pattern Classifier{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Live Traffic Pattern Classifier & Simulator</h1>
+    <p>Simulate an arbitrary 15-minute traffic interval and classify its operational congestion regime</p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Scenario Parameters</div>
+  <form id="predictionForm">
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="hourInput">Hour of Day (0 to 23.75): <span id="hourVal" style="color: #3b82f6; font-weight: bold;">8.5 (8:30 AM)</span></label>
+        <input type="range" id="hourInput" name="hour" min="0" max="23.75" step="0.25" value="8.5" oninput="updateHourDisplay(this.value)">
+      </div>
+
+      <div class="form-group">
+        <label for="daySelect">Day of the Week</label>
+        <select id="daySelect" name="day">
+          <option value="Monday">Monday (Weekday)</option>
+          <option value="Tuesday">Tuesday (Weekday)</option>
+          <option value="Wednesday">Wednesday (Weekday)</option>
+          <option value="Thursday">Thursday (Weekday)</option>
+          <option value="Friday">Friday (Weekday)</option>
+          <option value="Saturday">Saturday (Weekend)</option>
+          <option value="Sunday">Sunday (Weekend)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="carsInput">Car Count: <span id="carsVal" style="color: #3b82f6; font-weight: bold;">85</span></label>
+        <input type="number" id="carsInput" name="cars" min="0" max="250" value="85" oninput="document.getElementById('carsVal').innerText = this.value; updateTotals();">
+      </div>
+
+      <div class="form-group">
+        <label for="bikesInput">Bike / Motorcycle Count: <span id="bikesVal" style="color: #3b82f6; font-weight: bold;">25</span></label>
+        <input type="number" id="bikesInput" name="bikes" min="0" max="100" value="25" oninput="document.getElementById('bikesVal').innerText = this.value; updateTotals();">
+      </div>
+
+      <div class="form-group">
+        <label for="busesInput">Bus Count: <span id="busesVal" style="color: #3b82f6; font-weight: bold;">12</span></label>
+        <input type="number" id="busesInput" name="buses" min="0" max="50" value="12" oninput="document.getElementById('busesVal').innerText = this.value; updateTotals();">
+      </div>
+
+      <div class="form-group">
+        <label for="trucksInput">Truck Count (Freight): <span id="trucksVal" style="color: #3b82f6; font-weight: bold;">5</span></label>
+        <input type="number" id="trucksInput" name="trucks" min="0" max="60" value="5" oninput="document.getElementById('trucksVal').innerText = this.value; updateTotals();">
+      </div>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 1rem;">
+      <div style="font-size: 0.95rem; color: var(--text-muted);">
+        Total Volume: <strong id="totalDisplay" style="color: #f8fafc; font-size: 1.1rem;">127</strong> vehicles | Truck Share: <strong id="truckRatioDisplay" style="color: #f8fafc;">3.9%</strong>
+      </div>
+      <div style="display: flex; gap: 0.75rem;">
+        <button type="button" class="btn btn-secondary" onclick="loadPreset('morning_rush')">Preset: Morning Rush</button>
+        <button type="button" class="btn btn-secondary" onclick="loadPreset('night_freight')">Preset: Night Freight</button>
+        <button type="button" class="btn btn-secondary" onclick="loadPreset('weekend')">Preset: Weekend</button>
+        <button type="button" class="btn" onclick="submitPrediction()">Classify Regime</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<!-- Prediction Result Container -->
+<div id="predictionResult" class="prediction-box">
+  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+    <div>
+      <span id="resBadge" class="cluster-badge badge-c1">Cluster 1</span>
+      <h2 id="resPersona" style="font-size: 1.4rem; font-weight: 700; margin-top: 0.25rem;">Peak Commuter Rush Hour</h2>
+    </div>
+    <div style="text-align: right;">
+      <span style="font-size: 0.8rem; color: var(--text-muted);">Euclidean Centroid Distance</span>
+      <div id="resDistance" style="font-size: 1.25rem; font-weight: 700; color: #3b82f6;">1.42</div>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+    <div>
+      <h4 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 0.5rem;">Expected Congestion Likelihood (Ground Truth Proxy):</h4>
+      <div id="resSituationBars" style="display: flex; flex-direction: column; gap: 0.5rem;">
+        <!-- Populated via JS -->
+      </div>
+    </div>
+    <div>
+      <h4 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 0.5rem;">Regime Architectural Character:</h4>
+      <p id="resDescription" style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.6;">
+        Characterized by dominant personal vehicles, severe peak delays, and high bidirectional commuter flow.
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
